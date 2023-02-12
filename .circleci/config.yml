@@ -24,7 +24,11 @@ jobs:
         - run:
             name: Create Cloudformation Stack
             command: |
-              aws ec2 describe-instances  --query 'Reservations[*].Instances[*].PublicIpAddress'  --output text >> inventory
+              aws ec2 describe-instances  \
+              \
+               --query 'Reservations[*].Instances[*].PublicIpAddress'  \
+                --filters "Name=tag:Project,Values=udacity"  \
+                --output text >> inventory
 
 # Exercise: Config and Deployment
   configure_infrastructure: 
