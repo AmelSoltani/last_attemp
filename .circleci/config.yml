@@ -21,6 +21,14 @@ jobs:
                 --template-file template.yml \
                 --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
                 --region us-east-1
+        - run:
+            name: Create Cloudformation Stack
+            command: |
+              aws cloudformation deploy \
+                --template-file template.yml \
+                --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
+                --region us-east-1
+
 # Exercise: Config and Deployment
   configure_infrastructure: 
     docker:
@@ -37,7 +45,7 @@ jobs:
       - run:
           name: Configure server
           command: |
-            ansible-playbook -i inventory.txt main-remote.yml
+            aws ec2 describe-instances --query 'Reservations[*].Instances[*].{Instance:InstanceId,IP:PublicIpAddress}' --output text >> inventory
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -45,4 +53,5 @@ workflows:
   say-hello-workflow:
     jobs:
       - create_infrastructure
-      - configure_infrastructure
+      - configure_infrastructure:
+         requires: [create_infrastructure]
